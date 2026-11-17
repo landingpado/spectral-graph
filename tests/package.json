@@ -1,0 +1,9 @@
+{
+  "name": "lawgraph-viewer-tests",
+  "private": true,
+  "type": "module",
+  "description": "Headless browser test for the viewer. Run: node tests/test_viewer.mjs",
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

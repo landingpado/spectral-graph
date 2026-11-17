@@ -1,0 +1,20 @@
+# systemd unit for the explorer on the droplet. Assumes the layout from deploy/README.md:
+#   user `explorer`, app in /home/explorer/app, Miniforge in /home/explorer/miniforge3.
+# Install (as root):  cp /home/explorer/app/deploy/explorer.service /etc/systemd/system/
+#                     systemctl daemon-reload && systemctl enable --now explorer
+[Unit]
+Description=Citation-space explorer (lawgraph.serve)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=explorer
+WorkingDirectory=/home/explorer/app
+ExecStart=/home/explorer/miniforge3/envs/auto-spectral/bin/python -m lawgraph.serve --db graph.duckdb --port 8080 --no-open
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

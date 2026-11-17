@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supreme Court citation space, 1900–2020</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<style>
+  :root { --bg:#000; --fg:#eee; --dim:#888; --accent:#f6b26b; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:13px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; overflow:hidden; }
+  #c { position:fixed; inset:0; display:block; }
+  #hud { position:fixed; left:16px; top:14px; pointer-events:none; }
+  #year { font-size:44px; font-weight:300; letter-spacing:1px; }
+  #sub { color:var(--dim); font-size:11px; margin-top:-4px; }
+  #panel { position:fixed; right:16px; top:14px; width:300px; background:rgba(12,12,12,.85); border:1px solid #222; border-radius:8px; padding:12px 14px; backdrop-filter:blur(6px); }
+  #panel input[type=text] { width:100%; box-sizing:border-box; background:#111; color:var(--fg); border:1px solid #333; border-radius:4px; padding:7px 9px; font-size:13px; }
+  #results { max-height:180px; overflow:auto; margin:6px 0 0; padding:0; list-style:none; }
+  #results li { padding:4px 6px; cursor:pointer; border-radius:3px; color:#ccc; }
+  #results li:hover { background:#222; color:#fff; }
+  #results li span { color:var(--dim); font-size:11px; margin-left:6px; }
+  .seg { display:flex; margin-bottom:10px; border:1px solid #333; border-radius:5px; overflow:hidden; }
+  .seg button { flex:1; background:#111; color:#aaa; border:0; padding:6px 8px; font-size:12px; cursor:pointer; }
+  .seg button + button { border-left:1px solid #333; }
+  .seg button.on { background:#2a2118; color:var(--accent); }
+  .seg button:disabled { color:#555; cursor:not-allowed; }
+  #axes.off { display:none; }
+  #axes { margin-top:10px; border-top:1px solid #222; padding-top:8px; display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; color:var(--dim); font-size:11px; }
+  #axes select { background:#111; color:var(--fg); border:1px solid #333; border-radius:3px; padding:2px 2px; font-size:11px; margin-left:2px; }
+  #axes button.on { color:var(--accent); border-color:var(--accent); }
+  #info { margin-top:10px; border-top:1px solid #222; padding-top:8px; min-height:40px; }
+  #info h3 { margin:0 0 2px; font-size:14px; font-weight:600; }
+  #info .meta { color:var(--dim); font-size:11px; }
+  #info p { margin:6px 0 0; color:#ccc; }
+  #info a, a.cl { color:var(--accent); text-decoration:none; }
+  a.cl:hover { text-decoration:underline; }
+  #tip .meta { color:var(--dim); font-size:11px; }
+  #nbrs { margin:6px 0 0; padding:0; list-style:none; font-size:12px; }
+  #nbrs li { color:#bbb; cursor:pointer; padding:2px 0; }
+  #nbrs li:hover { color:#fff; }
+  #legend { margin-top:10px; border-top:1px solid #222; padding-top:8px; max-height:200px; overflow:auto; }
+  .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; vertical-align:middle; }
+  .chain { cursor:pointer; padding:2px 0; color:#bbb; }
+  .chain:hover, .chain.on { color:#fff; }
+  #bar { position:fixed; left:16px; right:16px; bottom:16px; display:flex; align-items:center; gap:12px; }
+  #yearsBtn { background:#111; color:var(--fg); border:1px solid #333; border-radius:4px; padding:6px 12px; cursor:pointer; white-space:nowrap; }
+  #yearsBtn.on { color:var(--accent); border-color:var(--accent); }
+  #hlbar { position:fixed; left:16px; top:92px; display:none; color:var(--accent); font-size:12px; background:rgba(12,12,12,.8); border:1px solid #2a2118; border-radius:4px; padding:4px 8px; }
+  #drawer { position:fixed; left:16px; right:348px; bottom:56px; height:44vh; display:none; border:1px solid #222; border-radius:8px; overflow:hidden; background:#000; }
+  body.drawer #drawer { display:block; }
+  body.drawer #status { display:none; }
+  #drawer iframe { width:100%; height:100%; border:0; display:block; }
+  #play { background:#111; color:var(--fg); border:1px solid #333; border-radius:4px; padding:6px 12px; cursor:pointer; }
+  #t { flex:1; accent-color:var(--accent); }
+  #tip { position:fixed; pointer-events:none; background:rgba(0,0,0,.8); border:1px solid #333; padding:4px 8px; border-radius:4px; font-size:12px; display:none; white-space:nowrap; }
+  #lbl { position:fixed; inset:0; pointer-events:none; }
+  .lab { position:absolute; transform:translate(-50%,-50%); font-size:11px; color:#fff; text-shadow:0 0 4px #000, 0 0 8px #000; white-space:nowrap; transition:opacity .4s; }
+  #status { position:fixed; left:16px; bottom:48px; color:var(--dim); font-size:11px; }
+  button.small { background:#111; color:#ccc; border:1px solid #333; border-radius:3px; padding:2px 7px; font-size:11px; cursor:pointer; margin-left:4px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="lbl"></div>
+<div id="hud"><div id="year">1900</div><div id="sub">SCOTUS co-citation · spectral coordinates · Leiden communities</div></div>
+<div id="panel">
+  <div id="proj" class="seg" title="How cases are placed: spectral eigenvector coordinates, or the precomputed force layout of the Leiden keyframes">
+    <button data-track="spectral" class="on">Spectral</button><button data-track="force">Force (Leiden)</button>
+  </div>
+  <input id="q" type="text" placeholder="find a case (e.g. Miranda)" autocomplete="off">
+  <ul id="results"></ul>
+  <div id="axes" title="Which aligned eigenvectors are drawn as x, y, z. λ is the eigenvalue of that direction at the current year: smaller = smoother, larger-scale structure.">
+    <label>x <select id="ax0"></select></label><label>y <select id="ax1"></select></label><label>z <select id="ax2"></select></label>
+    <button class="small" id="robust" title="the three dimensions that rotate least from year to year">robust set</button>
+  </div>
+  <div id="info"><span class="meta">Hover a point. Click to pin it, show its trail and co-cited neighbours.</span></div>
+  <div id="legend"></div>
+</div>
+<div id="bar"><button id="play">▶ Play</button><button id="yearsBtn" title="cases filed each year in any court (needs python -m lawgraph.serve); SCOTUS rows light up in the cloud">Year view</button><input id="t" type="range" min="0" max="1" step="1" value="0"><span id="speed">0.5 s / yr <button class="small" id="faster">faster</button><button class="small" id="slower">slower</button></span></div>
+<div id="status">loading…</div>
+<div id="hlbar"><span id="hltext"></span> <button class="small" id="hlclear">clear</button></div>
+<div id="drawer"></div>
+<div id="tip"></div>
+
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>

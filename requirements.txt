@@ -1,0 +1,23 @@
+duckdb>=1.1
+numpy
+scipy
+pandas
+matplotlib
+python-igraph
+leidenalg
+threadpoolctl
+
+# force layout on the CPU: the maintained fork of fa2 (plain `fa2` is used instead where it is installed)
+fa2_modified
+
+# local explorer: python -m lawgraph.serve
+fastapi
+uvicorn
+
+# optional, force layout on an NVIDIA GPU (viewer_build --gpu). CUDA 13 wheels shown; use the cuXX that
+# matches your driver. The full `cugraph` package is not needed, only its core library:
+#   pip install --extra-index-url=https://pypi.nvidia.com "pylibcugraph-cu13==26.10.*" cupy-cuda13x
+
+# tests: python -m pytest tests   (the browser test also needs Node: see tests/test_viewer.mjs)
+pytest
+httpx

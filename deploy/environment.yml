@@ -1,0 +1,26 @@
+# The server side of the local `auto-spectral` env: same name, same Python, and the same versions of the
+# 15 packages `python -m lawgraph.serve` imports (the other ~500, GPU libraries included, are only used by
+# the build, which stays on the workstation).
+#   conda env create -f deploy/environment.yml
+name: auto-spectral
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13.18
+  - pip
+  - pip:
+      - duckdb==2.0.0
+      - fastapi==0.163.1
+      - uvicorn==0.54.0
+      - starlette==1.10.0
+      - pydantic==2.14.3
+      - pydantic-core==2.50.4
+      - anyio==4.16.0
+      - h11==0.16.0
+      - click==8.5.1
+      - idna==3.20
+      - annotated-doc==0.0.6
+      - annotated-types==0.8.0
+      - typing-extensions==4.16.0
+      - typing-inspection==0.4.5
+      - opentelemetry-api==1.45.2
